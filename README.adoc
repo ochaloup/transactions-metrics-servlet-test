@@ -1,0 +1,33 @@
+= Servlet to see number under transaction statistics
+
+Simple servlet which uses datasource of default JBossEAP/Wildfly
+configuration and start a transaction to get some number to statistics
+for could be verified what is shown in that basic case.
+
+. Create a war file and deploy to JBoss EAP/WildFly
+
+* `mvn package`
+* `cp target/transaction-metrics.war`
+
+. Create management realm user to get access to management console
+
+* `$JBOSS_HOME/bin/add-user.sh`
+
+. Start JBoss EAP server
+
+* `$JBOSS_HOME/bin/standalone.sh`
+
+. Enable statistics under transactions subsystem
+
+* `$JBOSS_HOME/bin/jboss-cli.sh -c --command="/subsystem=transactions:write-attribute(name=enable-statistics, value=true)"`
+* `$JBOSS_HOME/bin/jboss-cli.sh -c --command="reload"`
+
+. Open webconsole at browser `localhost:9990` and go to
+`Runtime > Standalone server > Subsystems > Transactions` and check by `Refresh Results`
+what are the current statistics.
+
+. Go to one of the links and see how statistics will change
+
+* http://localhost:8080/transaction-metrics/commit
+* http://localhost:8080/transaction-metrics/rollback
+* http://localhost:8080/transaction-metrics/timeout
