@@ -16,6 +16,9 @@ import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
+
+import org.jboss.qa.ochaloup.ejb.xa.TestXAResource;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
@@ -27,6 +30,9 @@ public class TestBean {
 
     @Resource
     private EJBContext context;
+
+    @Resource(lookup = "java:jboss/TransactionManager")
+    private TransactionManager tm;
 
     @PostConstruct
     public void postConstruct() {
@@ -99,6 +105,17 @@ public class TestBean {
             }
         } catch (SQLException sqle) {
             throw new RuntimeException("select failed", sqle);
+        }
+    }
+
+    public void doXAFail() {
+        try {
+            context.getUserTransaction().begin();
+            tm.getTransaction().enlistResource(new TestXAResource(TestXAResource.Do.COMMIT_RMFAIL));
+            doInsert();
+            context.getUserTransaction().commit();
+        } catch (Exception e) {
+            throw new RuntimeException("this should not occur as RMFAIL will be managed by TM in recovery phase", e);
         }
     }
 

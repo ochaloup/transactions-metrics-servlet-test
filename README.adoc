@@ -31,3 +31,4 @@ what are the current statistics.
 * http://localhost:8080/transaction-metrics/commit
 * http://localhost:8080/transaction-metrics/rollback
 * http://localhost:8080/transaction-metrics/timeout
+* http://localhost:8080/transaction-metrics/xacommitfail
