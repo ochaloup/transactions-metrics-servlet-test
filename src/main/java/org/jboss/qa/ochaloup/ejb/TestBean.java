@@ -64,7 +64,7 @@ public class TestBean {
             throw new RuntimeException(e);
         }
     }
-    
+
     public void doRollback() {
         try {
             context.getUserTransaction().begin();
@@ -116,6 +116,17 @@ public class TestBean {
             context.getUserTransaction().commit();
         } catch (Exception e) {
             throw new RuntimeException("this should not occur as RMFAIL will be managed by TM in recovery phase", e);
+        }
+    }
+
+    public void doXAFailRmerr() {
+        try {
+            context.getUserTransaction().begin();
+            tm.getTransaction().enlistResource(new TestXAResource(TestXAResource.Do.COMMIT_RMERR));
+            doInsert();
+            context.getUserTransaction().commit();
+        } catch (Exception e) {
+            throw new RuntimeException("RMERR thrown by TestXAResource", e);
         }
     }
 

@@ -50,6 +50,7 @@ public class IndexServlet extends HttpServlet {
         out.println("do rollback: " + a("http://localhost:8080/transaction-metrics/rollback") + "</br>");
         out.println("do timeout: " + a("http://localhost:8080/transaction-metrics/timeout") + "</br>");
         out.println("do xa fail: " + a("http://localhost:8080/transaction-metrics/xacommitfail") + "</br>");
+        out.println("do xa fail with RMERR: " + a("http://localhost:8080/transaction-metrics/xacommitfailrmerr") + "</br>");
         out.println("</p>");
     }
 

@@ -32,7 +32,7 @@ public class TestXAResource implements XAResource {
     private Do whatToDo;
     
     public enum Do {
-        CLEAN, COMMIT_RMFAIL;
+        CLEAN, COMMIT_RMFAIL, COMMIT_RMERR;
     }
 
     public TestXAResource() {
@@ -46,8 +46,13 @@ public class TestXAResource implements XAResource {
     @Override
     public void commit(Xid arg0, boolean arg1) throws XAException {
         log.info("commit xid " + arg0);
-        if(whatToDo == Do.COMMIT_RMFAIL) {
-            throw new XAException(XAException.XAER_RMFAIL);
+        switch (whatToDo) {
+            case COMMIT_RMFAIL:
+                throw new XAException(XAException.XAER_RMFAIL);
+            case COMMIT_RMERR:
+                throw new XAException(XAException.XAER_RMERR);
+            default:
+                return;
         }
     }
 
