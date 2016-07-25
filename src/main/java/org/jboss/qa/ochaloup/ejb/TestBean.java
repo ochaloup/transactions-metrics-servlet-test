@@ -3,13 +3,18 @@ package org.jboss.qa.ochaloup.ejb;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.EJBContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.sql.DataSource;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -28,11 +33,17 @@ public class TestBean {
     @Resource(lookup = "java:jboss/datasources/ExampleDS")
     private DataSource ds;
 
-    @Resource
-    private EJBContext context;
+    @Resource(mappedName = "java:/jms/queue/DLQ")
+    private Queue queueExample;
+ 
+    @Resource(mappedName = "java:/JmsXA")
+    private ConnectionFactory cf;
 
     @Resource(lookup = "java:jboss/TransactionManager")
     private TransactionManager tm;
+
+    @Resource
+    private EJBContext context;
 
     @PostConstruct
     public void postConstruct() {
@@ -52,6 +63,7 @@ public class TestBean {
         try {
             context.getUserTransaction().begin();
             doInsert();
+            sendMessage("hi commit");
             context.getUserTransaction().commit();
         } catch (IllegalStateException | NotSupportedException | SystemException
                 | SecurityException | RollbackException | HeuristicMixedException | HeuristicRollbackException e) {
@@ -69,6 +81,7 @@ public class TestBean {
         try {
             context.getUserTransaction().begin();
             doInsert();
+            sendMessage("hi rollback");
             context.getUserTransaction().rollback();
         } catch (IllegalStateException | NotSupportedException | SystemException e) {
             e.printStackTrace();
@@ -139,4 +152,34 @@ public class TestBean {
             throw new RuntimeException("insert failed", sqle);
         }        
     }
+
+    private void sendMessage(String txt) {
+        javax.jms.Connection connection = null;
+        try {         
+            connection = cf.createConnection();
+            Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            MessageProducer publisher = null;
+ 
+            publisher = session.createProducer(queueExample);
+ 
+            connection.start();
+ 
+            TextMessage message = session.createTextMessage(txt);
+            publisher.send(message);
+            System.out.println("mesage " + txt + " was sent");
+        }
+        catch (Exception exc) {
+            exc.printStackTrace();
+        }
+        finally {         
+            if (connection != null)   {
+                try {
+                    connection.close();
+                } catch (JMSException e) {                    
+                    e.printStackTrace();
+                }
+ 
+            }
+        }
+    } 
 }
