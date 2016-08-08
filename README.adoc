@@ -15,7 +15,9 @@ for could be verified what is shown in that basic case.
 
 . Start JBoss EAP server
 
-* `$JBOSS_HOME/bin/standalone.sh`
+* `$JBOSS_HOME/bin/standalone.sh -c standalone-full.xml`
+
+(there is used messaging as we need to have started `-full` profile)
 
 . Enable statistics under transactions subsystem
 
