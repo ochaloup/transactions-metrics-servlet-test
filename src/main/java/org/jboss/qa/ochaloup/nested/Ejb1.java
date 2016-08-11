@@ -23,7 +23,6 @@
 package org.jboss.qa.ochaloup.nested;
 
 import javax.annotation.Resource;
-import javax.ejb.EJBContext;
 import javax.ejb.Stateless;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;

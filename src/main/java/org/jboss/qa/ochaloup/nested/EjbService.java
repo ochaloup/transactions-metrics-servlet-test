@@ -22,7 +22,6 @@
 
 package org.jboss.qa.ochaloup.nested;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
