@@ -24,6 +24,7 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
 import org.jboss.qa.ochaloup.ejb.xa.TestXAResource;
+import org.jboss.qa.ochaloup.utils.Database;
 
 @Stateless
 @TransactionManagement(TransactionManagementType.BEAN)
@@ -47,15 +48,11 @@ public class TestBean {
 
     @PostConstruct
     public void postConstruct() {
-        System.out.println("Post construct now");
-        try(Connection conn = ds.getConnection()) {
+        System.out.println("Post construct now: " + TestBean.class.getName());
+        try {
             selectCount();
         } catch (Exception sqle) {
-            try(Connection conn = ds.getConnection()) {
-                conn.createStatement().executeUpdate("CREATE TABLE " + TABLE + "(id INT, a VARCHAR(255))");
-            } catch (Exception e) {
-                throw new RuntimeException("can't create table", sqle);
-            }
+            Database.createTable(ds, TABLE);
         }
     }
 
@@ -108,19 +105,6 @@ public class TestBean {
         }
     }
 
-    public int selectCount() {
-        try(Connection conn = ds.getConnection()) {
-            ResultSet resultset = conn.createStatement().executeQuery(String.format("SELECT count(1) FROM %s", TABLE));
-            if(resultset.next()) {
-                return resultset.getInt(1);
-            } else {
-                return Integer.MIN_VALUE;
-            }
-        } catch (SQLException sqle) {
-            throw new RuntimeException("select failed", sqle);
-        }
-    }
-
     public void doXAFail() {
         try {
             context.getUserTransaction().begin();
@@ -143,14 +127,12 @@ public class TestBean {
         }
     }
 
-    private void doInsert() {
-        try(Connection conn = ds.getConnection()) {
-            int updated = conn.createStatement().executeUpdate(
-                    String.format("INSERT INTO %s (id, a) VALUES (%s,'%s')", TABLE, 1, "abc"));
-            System.out.println("INSERT to table " + TABLE + " outcome: " + updated);
-        } catch (SQLException sqle) {
-            throw new RuntimeException("insert failed", sqle);
-        }        
+    public int selectCount() {
+        return Database.selectCount(ds, TABLE);
+    }
+
+    public void doInsert() {
+        Database.doInsert(ds, TABLE, 1, "abc");
     }
 
     private void sendMessage(String txt) {

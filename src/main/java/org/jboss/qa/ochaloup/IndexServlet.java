@@ -52,6 +52,9 @@ public class IndexServlet extends HttpServlet {
         out.println("do xa fail: " + a("http://localhost:8080/transaction-metrics/xacommitfail") + "</br>");
         out.println("do xa fail with RMERR: " + a("http://localhost:8080/transaction-metrics/xacommitfailrmerr") + "</br>");
         out.println("</p>");
+        out.println("<p>");
+        out.println("nested bean: " + a("http://localhost:8080/transaction-metrics/nested") + "</br>");
+        out.println("</p>");
     }
 
     private String a(String addr) {
